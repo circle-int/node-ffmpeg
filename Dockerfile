@@ -2,6 +2,7 @@ FROM node:10
 RUN npm install pm2 -g
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN npm install -g lerna
+RUN mkdir -p ~/ffmpeg_sources ~/bin
 RUN apt-get update -y -qq && apt-get -y install \
   autoconf \
   automake \
