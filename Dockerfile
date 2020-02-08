@@ -1,8 +1,8 @@
 FROM node:10
 RUN npm install pm2 -g
+RUN mkdir -p /ffmpeg_sources /ffmpeg_build /bin
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN npm install -g lerna
-RUN mkdir -p ~/ffmpeg_sources ~/bin
 RUN apt-get update -y -qq && apt-get -y install \
   autoconf \
   automake \
@@ -25,21 +25,29 @@ RUN apt-get update -y -qq && apt-get -y install \
   zlib1g-dev
 
 RUN apt-get install nasm yasm libx264-dev libx265-dev libnuma-dev libvpx-dev libtheora-dev  libmp3lame-dev libopus-dev -y
+RUN apt-get update && \ 
+     apt-get install -yq --no-install-recommends \ 
+     libasound2 libatk1.0-0 libc6 libcairo2 libcups2 libdbus-1-3 \ 
+     libexpat1 libfontconfig1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 \ 
+     libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 \ 
+     libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 \ 
+     libnss3 
+RUN apt-get install software-properties-common -y
 
 RUN wget -O fdk-aac.zip https://github.com/mstorsjo/fdk-aac/zipball/master \
 && unzip fdk-aac.zip \
 && cd mstorsjo-fdk-aac* \
 && autoreconf -fiv \
-&& ./configure --prefix="$HOME/ffmpeg_build" --disable-shared \
+&& ./configure --prefix="/ffmpeg_build" --disable-shared \
 && make \
 && make install \
 && make distclean
-RUN git -C aom pull 2> /dev/null || git clone --depth 1 https://aomedia.googlesource.com/aom && \
-mkdir -p aom_build && \
-cd aom_build && \
-PATH="$HOME/bin:$PATH" cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX="$HOME/ffmpeg_build" -DENABLE_SHARED=off -DENABLE_NASM=on ../aom && \
-PATH="$HOME/bin:$PATH" make && \
-make install
+# RUN git -C aom pull 2> /dev/null || git clone --depth 1 https://aomedia.googlesource.com/aom && \
+# mkdir -p aom_build && \
+# cd aom_build && \
+# PATH="$HOME/bin:$PATH" cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX="$HOME/ffmpeg_build" -DENABLE_SHARED=off -DENABLE_NASM=on ../aom && \
+# PATH="$HOME/bin:$PATH" make && \
+# make install
 
 # RUN wget http://ffmpeg.org/releases/ffmpeg-snapshot.tar.bz2 \
 # && tar xjvf ffmpeg-snapshot.tar.bz2 \
@@ -57,15 +65,14 @@ make install
 RUN wget -O ffmpeg-snapshot.tar.bz2 https://ffmpeg.org/releases/ffmpeg-snapshot.tar.bz2 && \
 tar xjvf ffmpeg-snapshot.tar.bz2 && \
 cd ffmpeg && \
-PATH="$HOME/bin:$PATH" PKG_CONFIG_PATH="$HOME/ffmpeg_build/lib/pkgconfig" ./configure \
-  --prefix="$HOME/ffmpeg_build" \
+PATH="/bin:$PATH" PKG_CONFIG_PATH="/ffmpeg_build/lib/pkgconfig" ./configure \
+  --prefix="/ffmpeg_build" \
   --pkg-config-flags="--static" \
-  --extra-cflags="-I$HOME/ffmpeg_build/include" \
-  --extra-ldflags="-L$HOME/ffmpeg_build/lib" \
+  --extra-cflags="-I/ffmpeg_build/include" \
+  --extra-ldflags="-L/ffmpeg_build/lib" \
   --extra-libs="-lpthread -lm" \
-  --bindir="$HOME/bin" \
+  --bindir="/bin" \
   --enable-gpl \
-  --enable-libaom \
   --enable-libass \
   --enable-libfdk-aac \
   --enable-libfreetype \
@@ -76,7 +83,7 @@ PATH="$HOME/bin:$PATH" PKG_CONFIG_PATH="$HOME/ffmpeg_build/lib/pkgconfig" ./conf
   --enable-libx264 \
   --enable-libx265 \
   --enable-nonfree && \
-PATH="$HOME/bin:$PATH" make && \
+PATH="/bin:$PATH" make && \
 make install && \
 hash -r
 RUN apt-get install imagemagick -y
@@ -84,5 +91,3 @@ RUN apt-get install python-pip -y
 RUN pip install ez_setup
 RUN pip install moviepy==1.0.0
 RUN pip install scipy
-
-#things will end here 
