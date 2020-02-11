@@ -42,26 +42,14 @@ RUN wget -O fdk-aac.zip https://github.com/mstorsjo/fdk-aac/zipball/master \
 && make \
 && make install \
 && make distclean
-# RUN git -C aom pull 2> /dev/null || git clone --depth 1 https://aomedia.googlesource.com/aom && \
-# mkdir -p aom_build && \
-# cd aom_build && \
-# PATH="$HOME/bin:$PATH" cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX="$HOME/ffmpeg_build" -DENABLE_SHARED=off -DENABLE_NASM=on ../aom && \
-# PATH="$HOME/bin:$PATH" make && \
-# make install
+RUN git -C aom pull 2> /dev/null || git clone --depth 1 https://aomedia.googlesource.com/aom && \
+mkdir -p aom_build && \
+cd aom_build && \
+PATH="$HOME/bin:$PATH" cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX="$HOME/ffmpeg_build" -DENABLE_SHARED=off -DENABLE_NASM=on ../aom && \
+PATH="$HOME/bin:$PATH" make && \
+make install
 
-# RUN wget http://ffmpeg.org/releases/ffmpeg-snapshot.tar.bz2 \
-# && tar xjvf ffmpeg-snapshot.tar.bz2 \
-# && cd ffmpeg \
-# && PKG_CONFIG_PATH="$HOME/ffmpeg_build/lib/pkgconfig" \
-# && export PKG_CONFIG_PATH \
-# && ./configure --prefix="$HOME/ffmpeg_build" --extra-cflags="-I$HOME/ffmpeg_build/include" \
-#    --extra-ldflags="-L$HOME/ffmpeg_build/lib" --bindir="$HOME/bin" --extra-libs="-ldl" --enable-gpl \
-#    --enable-libass --enable-libfdk-aac --enable-libfreetype --enable-libwebp --enable-libmp3lame --enable-libopus \
-#    --enable-libtheora --enable-libvorbis --enable-avresample --enable-libx265 --enable-openssl --enable-libvpx --enable-libx264 --enable-nonfree \
-# && make \
-# && make install \
-# && make distclean \
-# && hash -r
+
 RUN wget -O ffmpeg-snapshot.tar.bz2 https://ffmpeg.org/releases/ffmpeg-snapshot.tar.bz2 && \
 tar xjvf ffmpeg-snapshot.tar.bz2 && \
 cd ffmpeg && \
@@ -72,20 +60,44 @@ PATH="/bin:$PATH" PKG_CONFIG_PATH="/ffmpeg_build/lib/pkgconfig" ./configure \
   --extra-ldflags="-L/ffmpeg_build/lib" \
   --extra-libs="-lpthread -lm" \
   --bindir="/bin" \
-  --enable-gpl \
-  --enable-libass \
-  --enable-libfdk-aac \
-  --enable-libfreetype \
-  --enable-libmp3lame \
-  --enable-libopus \
-  --enable-libvorbis \
-  --enable-libvpx \
-  --enable-libx264 \
-  --enable-libx265 \
-  --enable-nonfree && \
+  --disable-debug \
+ --disable-doc \
+ --disable-ffplay \
+ --enable-shared \
+ --enable-avresample \
+ --enable-libopencore-amrnb \
+ --enable-libopencore-amrwb \
+ --enable-gpl \
+ --enable-libass \
+ --enable-libfreetype \
+ --enable-libvidstab \
+ --enable-libmp3lame \
+ --enable-libopenjpeg \
+ --enable-libopus \
+ --enable-libtheora \
+ --enable-libvorbis \
+ --enable-libvpx \
+ --enable-libwebp \
+ --enable-libxcb \
+ --enable-libx265 \
+ --enable-libxvid \
+ --enable-libx264 \
+ --enable-nonfree \
+ --enable-openssl \
+ --enable-libfdk-aac \
+ --enable-libkvazaar \
+ --enable-libaom \
+ --extra-libs=-lpthread \
+ --enable-postproc \
+ --enable-small \
+ --enable-version3 \
+ --enable-libbluray \
+ --enable-nonfree && \
 PATH="/bin:$PATH" make && \
 make install && \
 hash -r
+
+ 
 RUN apt-get install imagemagick -y
 RUN apt-get install python-pip -y
 RUN pip install ez_setup
