@@ -24,7 +24,7 @@ RUN apt-get update -y -qq && apt-get -y install \
   wget \
   zlib1g-dev
 
-RUN apt-get install nasm yasm libx264-dev libx265-dev libnuma-dev libvpx-dev libtheora-dev  libmp3lame-dev libopus-dev -y
+RUN apt-get install nasm yasm libx264-dev  libopencore-amrnb-dev libopencore-amrwb-dev libx265-dev libnuma-dev libvpx-dev libtheora-dev  libmp3lame-dev libopus-dev -y
 RUN apt-get update && \ 
      apt-get install -yq --no-install-recommends \ 
      libasound2 libatk1.0-0 libc6 libcairo2 libcups2 libdbus-1-3 \ 
@@ -42,13 +42,16 @@ RUN wget -O fdk-aac.zip https://github.com/mstorsjo/fdk-aac/zipball/master \
 && make \
 && make install \
 && make distclean
-RUN git -C aom pull 2> /dev/null || git clone --depth 1 https://aomedia.googlesource.com/aom && \
-mkdir -p aom_build && \
-cd aom_build && \
-PATH="$HOME/bin:$PATH" cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX="$HOME/ffmpeg_build" -DENABLE_SHARED=off -DENABLE_NASM=on ../aom && \
-PATH="$HOME/bin:$PATH" make && \
-make install
-
+# RUN git -C aom pull 2> /dev/null || git clone --depth 1 https://aomedia.googlesource.com/aom && \
+# mkdir -p aom_build && \
+# cd aom_build && \
+# PATH="$HOME/bin:$PATH" cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX="$HOME/ffmpeg_build" -DENABLE_SHARED=off -DENABLE_NASM=on ../aom && \
+# PATH="$HOME/bin:$PATH" make && \
+# make install
+RUN echo "deb http://www.deb-multimedia.org stretch main" >> /etc/apt/sources.list \
+ && apt-get update -y \
+ && apt-get install deb-multimedia-keyring -y --allow-unauthenticated\
+ && apt-get install libkvazaar-dev libvidstab-dev -y --allow-unauthenticated
 
 RUN wget -O ffmpeg-snapshot.tar.bz2 https://ffmpeg.org/releases/ffmpeg-snapshot.tar.bz2 && \
 tar xjvf ffmpeg-snapshot.tar.bz2 && \
@@ -63,7 +66,6 @@ PATH="/bin:$PATH" PKG_CONFIG_PATH="/ffmpeg_build/lib/pkgconfig" ./configure \
   --disable-debug \
  --disable-doc \
  --disable-ffplay \
- --enable-shared \
  --enable-avresample \
  --enable-libopencore-amrnb \
  --enable-libopencore-amrwb \
@@ -80,18 +82,14 @@ PATH="/bin:$PATH" PKG_CONFIG_PATH="/ffmpeg_build/lib/pkgconfig" ./configure \
  --enable-libwebp \
  --enable-libxcb \
  --enable-libx265 \
- --enable-libxvid \
  --enable-libx264 \
  --enable-nonfree \
  --enable-openssl \
  --enable-libfdk-aac \
  --enable-libkvazaar \
- --enable-libaom \
- --extra-libs=-lpthread \
  --enable-postproc \
  --enable-small \
  --enable-version3 \
- --enable-libbluray \
  --enable-nonfree && \
 PATH="/bin:$PATH" make && \
 make install && \
