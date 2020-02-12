@@ -101,3 +101,5 @@ RUN apt-get install python-pip -y
 RUN pip install ez_setup
 RUN pip install moviepy==1.0.0
 RUN pip install scipy
+RUN apt-get install fonts-indic -y
+RUN apt-get install fonts-noto -y
