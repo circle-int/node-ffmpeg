@@ -53,9 +53,10 @@ RUN echo "deb http://www.deb-multimedia.org stretch main" >> /etc/apt/sources.li
  && apt-get install deb-multimedia-keyring -y --allow-unauthenticated\
  && apt-get install libkvazaar-dev libvidstab-dev -y --allow-unauthenticated
 
-RUN wget -O ffmpeg-snapshot.tar.bz2 https://ffmpeg.org/releases/ffmpeg-snapshot.tar.bz2 && \
-tar xjvf ffmpeg-snapshot.tar.bz2 && \
-cd ffmpeg && \
+
+RUN wget -O ffmpeg-4.2.2.tar.bz2 https://ffmpeg.org/releases/ffmpeg-4.2.2.tar.bz2 && \
+tar xjvf ffmpeg-4.2.2.tar.bz2 && \
+cd ffmpeg-4.2.2 && \
 PATH="/bin:$PATH" PKG_CONFIG_PATH="/ffmpeg_build/lib/pkgconfig" ./configure \
   --prefix="/ffmpeg_build" \
   --pkg-config-flags="--static" \
