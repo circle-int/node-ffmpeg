@@ -1,4 +1,4 @@
-FROM node:10
+FROM node:14
 RUN npm install pm2 -g
 RUN mkdir -p /ffmpeg_sources /ffmpeg_build /bin
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
